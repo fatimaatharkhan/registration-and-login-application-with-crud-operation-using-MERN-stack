@@ -75,43 +75,62 @@ app.get("/", (req, res) => {
 });
 
 /* login api */
+/* login api */
 app.post("/login", (req, res) => {
   try {
-    if (req.body && req.body.username && req.body.password) {
-      user.find({ username: req.body.username }, (err, data) => {
-        if (data.length > 0) {
+    // Ensure username and password are provided
+    if (!req.body.username || !req.body.password) {
+      return res.status(400).json({
+        errorMessage: 'Add proper parameter first!',
+        status: false
+      });
+    }
 
-          if (bcrypt.compareSync(data[0].password, req.body.password)) {
-            checkUserAndGenerateToken(data[0], req, res);
-          } else {
+    // Query the database to find the user by username
+    user.findOne({ username: req.body.username }, (err, user) => {
+      if (err) {
+        return res.status(500).json({
+          errorMessage: 'Database error!',
+          status: false
+        });
+      }
 
-            res.status(400).json({
-              errorMessage: 'Username or password is incorrect!',
-              status: false
-            });
-          }
+      // Check if the user exists
+      if (!user) {
+        return res.status(400).json({
+          errorMessage: 'Username or password is incorrect!',
+          status: false
+        });
+      }
 
+      // Compare the provided password with the hashed password in the database
+      bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
+        if (err) {
+          return res.status(500).json({
+            errorMessage: 'Something went wrong!',
+            status: false
+          });
+        }
+        
+        if (isMatch) {
+          // If passwords match, generate and send a token
+          checkUserAndGenerateToken(user, req, res);
         } else {
           res.status(400).json({
             errorMessage: 'Username or password is incorrect!',
             status: false
           });
         }
-      })
-    } else {
-      res.status(400).json({
-        errorMessage: 'Add proper parameter first!',
-        status: false
       });
-    }
+    });
   } catch (e) {
     res.status(400).json({
       errorMessage: 'Something went wrong!',
       status: false
     });
   }
-
 });
+
 
 /* register api */
 app.post("/register", (req, res) => {
