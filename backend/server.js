@@ -7,7 +7,7 @@ var multer = require('multer'),
   bodyParser = require('body-parser'),
   path = require('path');
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost/productDB");
+mongoose.connect("mongodb://localhost:27017/productDB");
 var fs = require('fs');
 var product = require("./model/product.js");
 var user = require("./model/user.js");
@@ -367,6 +367,6 @@ app.get("/get-product", (req, res) => {
 
 });
 
-app.listen(2000, () => {
-  console.log("Server is Runing On port 2000");
+app.listen(5000, () => {
+  console.log("Server is Runing On port 5000");
 });
